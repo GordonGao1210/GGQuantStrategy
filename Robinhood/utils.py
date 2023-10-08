@@ -1,10 +1,12 @@
 import datetime
+import pandas as pd
+import yfinance as yf
 
 
 CASH_APY = 0.049
 
 
-def get_num_days_per_mon_within_range(start_date: str, end_date: str) -> list:
+def get_num_day_per_mon_within_range(start_date: str, end_date: str) -> list:
     """
     Method that calculates number of days in each month between start date and end date.
 
@@ -46,14 +48,27 @@ def calculate_cash_pnl(cash_amount: float, start_date: str, end_date: str, apy: 
         Assume in the format "YYYY-mm-dd".
     """
     daily_rate = apy / 365
-    num_days_per_month = get_num_days_per_mon_within_range(start_date, end_date)
+    num_day_per_month = get_num_day_per_mon_within_range(start_date, end_date)
     
     pnl = []
-    for days in num_days_per_month:
+    for days in num_day_per_month:
         pnl.append(cash_amount * daily_rate * days)
         cash_amount += pnl[-1]
     
     return cash_amount
+
+
+def download_data(ticker: list, start_date: str, end_date: str) -> pd.DataFrame:
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+
+    data = yf.download(ticker, start=start_date, end=end_date)
+
+    return data
+
+
+def convert_price_to_return(df: pd.DataFrame) -> pd.DataFrame:
+    return df.pct_change(1)
 
 
 
@@ -64,3 +79,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
